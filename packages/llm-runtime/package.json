@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.82",
+    "@ai-sdk/anthropic": "^4.0.85",
     "@ai-sdk/google": "^4.0.99",
     "@ai-sdk/openai": "^4.0.96",
     "@ai-sdk/openai-compatible": "^2.0.85",
