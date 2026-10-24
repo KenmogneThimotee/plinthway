@@ -15,6 +15,10 @@
   },
   "type": "module",
   "packageManager": "pnpm@10.18.3",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
     "node": ">=24 <25"
   },

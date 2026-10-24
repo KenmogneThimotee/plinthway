@@ -59,7 +59,7 @@ jobs:
       - run: bun --version
       - run: bun install
       - run: bunx vitest run packages/shared packages/config packages/profiles
-      - run: bun run build
+      - run: bun --filter '*' build
       - run: bun apps/cli/dist/main.js --version
 
   supply-chain:

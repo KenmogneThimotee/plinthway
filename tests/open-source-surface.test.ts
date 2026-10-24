@@ -20,6 +20,7 @@ describe('open-source repository surface', () => {
       type: 'git',
       url: 'git+https://github.com/KenmogneThimotee/plinthway.git',
     });
+    expect(root.workspaces).toEqual(['apps/*', 'packages/*']);
     expect(cli).toMatchObject({
       name: 'plinthway',
       author: 'KenmogneThimotee',
@@ -35,6 +36,7 @@ describe('open-source repository surface', () => {
     expect(cli.keywords).toEqual(
       expect.arrayContaining(['ai', 'cli', 'mcp', 'model-context-protocol', 'agents']),
     );
+    expect(cli.dependencies).toMatchObject({ yaml: '2.9.1' });
   });
 
   it('ships the expected community and release files without internal planning documents', async () => {
@@ -72,6 +74,8 @@ describe('open-source repository surface', () => {
     const ci = await text('.github/workflows/ci.yml');
     expect(ci).toContain('pnpm --filter plinthway pack');
     expect(ci).toContain('plinthway-cli-');
+    expect(ci).toContain("bun --filter '*' build");
+    expect(ci).not.toContain('bun run build');
     expect(ci).not.toContain('@plinthway/cli');
     expect(ci).not.toContain('harness-release-artifacts');
 

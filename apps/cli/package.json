@@ -49,7 +49,8 @@
     "ink": "8.0.0",
     "marked": "18.0.14",
     "open": "11.0.4",
-    "react": "19.3.1"
+    "react": "19.3.1",
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@plinthway/agent-core": "workspace:*",
