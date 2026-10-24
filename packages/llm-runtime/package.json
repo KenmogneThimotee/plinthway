@@ -13,7 +13,7 @@
     "@ai-sdk/anthropic": "^4.0.82",
     "@ai-sdk/google": "^4.0.99",
     "@ai-sdk/openai": "^4.0.96",
-    "@ai-sdk/openai-compatible": "^2.0.85",
+    "@ai-sdk/openai-compatible": "^3.0.75",
     "@plinthway/auth": "workspace:*",
     "@plinthway/config": "workspace:*",
     "@plinthway/model-registry": "workspace:*",
