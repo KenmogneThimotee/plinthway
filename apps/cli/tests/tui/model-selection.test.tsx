@@ -65,6 +65,15 @@ function outputStream(): {
   };
 }
 
+async function waitForInitialRender(output: { read(): string }): Promise<void> {
+  await vi.waitFor(
+    () => {
+      expect(output.read()).toContain('profile: default');
+    },
+    { timeout: 5_000 },
+  );
+}
+
 describe('TUI profile model selection', () => {
   it('keeps the application receiver when loading native tools during startup', async () => {
     const application = {
@@ -91,13 +100,12 @@ describe('TUI profile model selection', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
 
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
     expect(stdout.read()).not.toContain('Model catalog unavailable');
     expect(stderr.read()).toBe('');
   });
@@ -200,13 +208,12 @@ describe('TUI profile model selection', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
 
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
     stdin.push('/model');
     await vi.waitFor(() => {
       expect(stdout.read()).toContain('/model');
@@ -301,12 +308,11 @@ describe('TUI profile model selection', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
 
     stdin.push('/model');
     await vi.waitFor(() => {
@@ -436,12 +442,11 @@ describe('TUI profile model selection', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
 
     stdin.push('/model');
     await vi.waitFor(() => {

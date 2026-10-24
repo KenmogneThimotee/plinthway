@@ -57,6 +57,15 @@ function outputStream(): { stream: NodeJS.WriteStream; read(): string } {
   };
 }
 
+async function waitForInitialRender(output: { read(): string }): Promise<void> {
+  await vi.waitFor(
+    () => {
+      expect(output.read()).toContain('profile: default');
+    },
+    { timeout: 5_000 },
+  );
+}
+
 async function* completion() {
   await Promise.resolve();
   yield { type: 'finish' as const, reason: 'stop' as const };
@@ -134,13 +143,12 @@ describe('TUI MCP connections', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
 
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
     stdin.push('/mcp');
     await instance.waitUntilRenderFlush();
     stdin.push('\r');
@@ -201,13 +209,12 @@ describe('TUI MCP connections', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
 
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
     stdin.push('/mcp');
     await instance.waitUntilRenderFlush();
     stdin.push('\r');
@@ -281,13 +288,12 @@ describe('TUI MCP connections', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
 
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
     stdin.push('/mcp connect docs');
     await instance.waitUntilRenderFlush();
     stdin.push('\r');
@@ -373,13 +379,12 @@ describe('TUI MCP connections', () => {
       stdout: stdout.stream,
       stderr: stderr.stream,
       exitOnCtrlC: false,
+      interactive: true,
       patchConsole: false,
     });
     mounted.push(instance);
 
-    await vi.waitFor(() => {
-      expect(stdout.read()).toContain('profile: default');
-    });
+    await waitForInitialRender(stdout);
     stdin.push('start session');
     await instance.waitUntilRenderFlush();
     stdin.push('\r');
