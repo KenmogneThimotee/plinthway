@@ -16,7 +16,9 @@ afterEach(async () => {
 
 describe('SessionDatabase', () => {
   it('supports Node 24 releases where StatementSync has no explicit close method', () => {
-    expect(() => closeStatement({})).not.toThrow();
+    expect(() => {
+      closeStatement({});
+    }).not.toThrow();
     const close = vi.fn();
     closeStatement({ close });
     expect(close).toHaveBeenCalledOnce();
