@@ -48,7 +48,7 @@
     "@playwright/test": "1.57.0",
     "@types/node": "^24.7.2",
     "eslint": "^9.38.0",
-    "jose": "6.2.12",
+    "jose": "6.2.13",
     "prettier": "^3.6.2",
     "tsup": "^8.5.0",
     "tsx": "4.20.6",
