@@ -1,0 +1,17 @@
+{
+  "name": "@plinthway/sessions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plinthway/mcp-client": "workspace:*",
+    "@plinthway/shared": "workspace:*",
+    "@plinthway/profiles": "workspace:*"
+  }
+}

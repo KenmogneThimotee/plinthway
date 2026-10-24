@@ -1,0 +1,18 @@
+{
+  "name": "@plinthway/mcp-app-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plinthway/shared": "workspace:*",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/ext-apps": "2.0.3",
+    "zod": "4.6.7"
+  }
+}

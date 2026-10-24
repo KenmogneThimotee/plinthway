@@ -1,0 +1,25 @@
+schemaVersion: 1
+id: research
+name: Research
+description: A read-oriented profile for source-backed investigation.
+model:
+  primary: openai/gpt-5
+  fallback: []
+  parameters:
+    temperature: 0.1
+mcp:
+  enabled:
+    - web
+tools:
+  defaultPolicy: deny
+  rules:
+    - tool: web.search
+      action: allow
+    - tool: web.open
+      action: allow
+agent:
+  instructionsFile: ../instructions/research.md
+  maxSteps: 20
+  toolTimeoutSeconds: 45
+session:
+  persist: true

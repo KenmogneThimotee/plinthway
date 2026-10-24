@@ -1,0 +1,17 @@
+schemaVersion: 1
+registry:
+  cache: false
+providers:
+  openai:
+    adapter: openai
+    authPlugin: openai-api-key
+mcpServers:
+  files:
+    transport: stdio
+    command: file-server
+    args: ['${WORKSPACE}']
+  remote:
+    transport: streamable-http
+    url: '${PUBLIC_MCP_URL}'
+security:
+  defaultToolPolicy: deny

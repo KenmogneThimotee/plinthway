@@ -1,0 +1,44 @@
+{
+  "anthropic": {
+    "id": "anthropic",
+    "name": "Anthropic",
+    "npm": "@ai-sdk/anthropic",
+    "api": "https://api.anthropic.com/v1",
+    "env": ["ANTHROPIC_API_KEY"],
+    "doc": "https://docs.anthropic.com",
+    "future_provider_field": "preserved only in raw cache",
+    "models": {
+      "claude-test": {
+        "id": "claude-test",
+        "name": "Claude Test",
+        "limit": { "context": 200000, "output": 8192 },
+        "tool_call": true,
+        "reasoning": true,
+        "structured_output": false,
+        "future_model_field": { "safe": true }
+      },
+      "claude-small": {
+        "id": "claude-small",
+        "name": "Claude Small",
+        "limit": { "context": 32000 },
+        "tool_call": false
+      }
+    }
+  },
+  "openai": {
+    "id": "openai",
+    "name": "OpenAI",
+    "npm": "@ai-sdk/openai",
+    "env": ["OPENAI_API_KEY"],
+    "models": {
+      "gpt-test": {
+        "id": "gpt-test",
+        "name": "GPT Test",
+        "limit": { "context": 128000, "output": 16384 },
+        "tool_call": true,
+        "reasoning": false,
+        "structured_output": true
+      }
+    }
+  }
+}

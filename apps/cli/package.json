@@ -1,0 +1,69 @@
+{
+  "name": "plinthway",
+  "version": "0.1.0",
+  "description": "Local-first, policy-controlled runtime for AI models and MCP servers",
+  "license": "MIT",
+  "author": "KenmogneThimotee",
+  "keywords": [
+    "agents",
+    "ai",
+    "chatgpt",
+    "cli",
+    "llm",
+    "mcp",
+    "model-context-protocol",
+    "terminal"
+  ],
+  "homepage": "https://github.com/KenmogneThimotee/plinthway#readme",
+  "bugs": {
+    "url": "https://github.com/KenmogneThimotee/plinthway/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KenmogneThimotee/plinthway.git",
+    "directory": "apps/cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "bin": {
+    "plinthway": "dist/main.js"
+  },
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "8.7.3",
+    "@napi-rs/keyring": "^2.1.1",
+    "commander": "15.0.0",
+    "ink": "8.0.0",
+    "marked": "18.0.14",
+    "open": "11.0.4",
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "@plinthway/agent-core": "workspace:*",
+    "@plinthway/app-core": "workspace:*",
+    "@plinthway/auth": "workspace:*",
+    "@plinthway/config": "workspace:*",
+    "@plinthway/llm-runtime": "workspace:*",
+    "@plinthway/local-tools": "workspace:*",
+    "@plinthway/mcp-client": "workspace:*",
+    "@plinthway/model-registry": "workspace:*",
+    "@plinthway/policy": "workspace:*",
+    "@plinthway/profiles": "workspace:*",
+    "@plinthway/sessions": "workspace:*",
+    "@plinthway/shared": "workspace:*",
+    "@types/react": "19.3.0"
+  }
+}

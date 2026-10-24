@@ -1,0 +1,185 @@
+{
+  "core": {
+    "specification": "2026-07-28",
+    "schema": "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/1155ca460e5097019f32769b38dcba194432e2fb/schema/2026-07-28",
+    "conformancePackage": "@modelcontextprotocol/conformance@0.2.0-alpha.10",
+    "requirements": "requirements/2026-07-28.yaml",
+    "requiredClientScenarios": [
+      "tools_call",
+      "request-metadata",
+      "auth/metadata-default",
+      "auth/metadata-var1",
+      "auth/metadata-var2",
+      "auth/metadata-var3",
+      "auth/basic-cimd",
+      "auth/scope-from-www-authenticate",
+      "auth/scope-from-scopes-supported",
+      "auth/scope-omitted-when-undefined",
+      "auth/scope-step-up",
+      "auth/scope-retry-limit",
+      "auth/token-endpoint-auth-basic",
+      "auth/token-endpoint-auth-post",
+      "auth/token-endpoint-auth-none",
+      "auth/pre-registration",
+      "auth/resource-mismatch",
+      "auth/offline-access-scope",
+      "auth/offline-access-not-supported",
+      "auth/authorization-server-migration",
+      "auth/iss-supported",
+      "auth/iss-not-advertised",
+      "auth/iss-supported-missing",
+      "auth/iss-wrong-issuer",
+      "auth/iss-unexpected",
+      "auth/iss-normalized",
+      "auth/metadata-issuer-mismatch",
+      "sep-2322-client-request-state",
+      "http-standard-headers",
+      "http-custom-headers",
+      "http-invalid-tool-headers",
+      "json-schema-ref-no-deref"
+    ]
+  },
+  "extensions": [
+    {
+      "id": "io.modelcontextprotocol/tasks",
+      "revision": "2026-07-28",
+      "source": "https://github.com/modelcontextprotocol/ext-tasks/tree/899c1bbc869567670093face3591b39c28ce3219",
+      "package": "@modelcontextprotocol/ext-tasks@0.2.2",
+      "acceptanceId": "AT-MCP-EXT-01"
+    },
+    {
+      "id": "io.modelcontextprotocol/skills",
+      "revision": "2026-07-28",
+      "source": "https://github.com/modelcontextprotocol/ext-skills/tree/c1aa87e4c381c82b99aa37471d0eae4ab50f9985",
+      "acceptanceId": "AT-MCP-EXT-02"
+    },
+    {
+      "id": "io.modelcontextprotocol/ui",
+      "revision": "2026-07-28",
+      "source": "https://github.com/modelcontextprotocol/ext-apps/tree/82221c0c8ce7661efa6771c9d461511b1650495f",
+      "package": "@modelcontextprotocol/ext-apps@2.0.3",
+      "acceptanceId": "AT-MCP-EXT-03"
+    },
+    {
+      "id": "io.modelcontextprotocol/oauth-client-credentials",
+      "revision": "2026-07-28",
+      "source": "https://github.com/modelcontextprotocol/ext-auth/tree/fb374c7db2b34f18ca9183882e0beecdf661892b",
+      "acceptanceId": "AT-MCP-EXT-04"
+    },
+    {
+      "id": "io.modelcontextprotocol/enterprise-managed-authorization",
+      "revision": "2026-07-28",
+      "source": "https://github.com/modelcontextprotocol/ext-auth/tree/fb374c7db2b34f18ca9183882e0beecdf661892b",
+      "acceptanceId": "AT-MCP-EXT-05"
+    }
+  ],
+  "coverage": [
+    {
+      "id": "AT-MCP-CORE-01",
+      "area": "modern metadata, discovery, headers, version fallback",
+      "scenarios": [
+        "request-metadata",
+        "http-standard-headers",
+        "http-custom-headers",
+        "http-invalid-tool-headers"
+      ]
+    },
+    {
+      "id": "AT-MCP-CORE-02",
+      "area": "tools and JSON Schema preservation",
+      "scenarios": ["tools_call", "json-schema-ref-no-deref"]
+    },
+    {
+      "id": "AT-MCP-CORE-03",
+      "area": "prompts and argument completion",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-04",
+      "area": "resources, templates, reads, and subscriptions",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-05",
+      "area": "pagination, private response caching, and list invalidation",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-06",
+      "area": "roots",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-07",
+      "area": "sampling",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-08",
+      "area": "form and URL elicitation",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-09",
+      "area": "progress, cancellation, and logging",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-10",
+      "area": "multi-round-trip request state",
+      "scenarios": ["sep-2322-client-request-state"]
+    },
+    {
+      "id": "AT-MCP-CORE-11",
+      "area": "OAuth metadata, CIMD, registration, and issuer validation",
+      "scenarios": [
+        "auth/metadata-default",
+        "auth/metadata-var1",
+        "auth/metadata-var2",
+        "auth/metadata-var3",
+        "auth/basic-cimd",
+        "auth/pre-registration",
+        "auth/authorization-server-migration",
+        "auth/iss-supported",
+        "auth/iss-not-advertised",
+        "auth/iss-supported-missing",
+        "auth/iss-wrong-issuer",
+        "auth/iss-unexpected",
+        "auth/iss-normalized",
+        "auth/metadata-issuer-mismatch"
+      ]
+    },
+    {
+      "id": "AT-MCP-CORE-12",
+      "area": "OAuth scopes, resource binding, and token endpoint authentication",
+      "scenarios": [
+        "auth/scope-from-www-authenticate",
+        "auth/scope-from-scopes-supported",
+        "auth/scope-omitted-when-undefined",
+        "auth/scope-step-up",
+        "auth/scope-retry-limit",
+        "auth/token-endpoint-auth-basic",
+        "auth/token-endpoint-auth-post",
+        "auth/token-endpoint-auth-none",
+        "auth/resource-mismatch",
+        "auth/offline-access-scope",
+        "auth/offline-access-not-supported"
+      ]
+    },
+    {
+      "id": "AT-MCP-CORE-13",
+      "area": "stdio and Streamable HTTP transports",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-CORE-14",
+      "area": "schema, payload, URL, and process-boundary validation",
+      "scenarios": []
+    },
+    {
+      "id": "AT-MCP-SCALE-01",
+      "area": "25-server lifecycle and resource cleanup",
+      "scenarios": []
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "anthropic": {
+    "id": "anthropic",
+    "name": "Anthropic",
+    "models": {
+      "claude-test": {
+        "id": "claude-test",
+        "name": "Claude Test Updated",
+        "limit": { "context": 250000, "output": 12000 },
+        "tool_call": true,
+        "reasoning": true,
+        "structured_output": true
+      }
+    }
+  }
+}

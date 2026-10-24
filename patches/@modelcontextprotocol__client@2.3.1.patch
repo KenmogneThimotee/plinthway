@@ -1,0 +1,174 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 71cf63076b073284aa14f63cd41efa653e8def0f..f00ac255628e6958318f27aef72ef3e563131e04 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -549,6 +549,15 @@ function assertSecureTokenEndpoint(tokenEndpoint) {
+ 	if (url.protocol !== "https:" && !isLoopbackHost(url.hostname)) throw new InsecureTokenEndpointError(url.href);
+ 	return url;
+ }
++const PLINTHWAY_RESTRICTED_FETCH_BRAND = Symbol.for("plinthway.restricted-fetch");
++function tokenEndpointForFetch(tokenEndpoint, fetchFn) {
++	if (fetchFn?.[PLINTHWAY_RESTRICTED_FETCH_BRAND] === true) return new URL(String(tokenEndpoint));
++	return assertSecureTokenEndpoint(tokenEndpoint);
++}
++function preservePlinthwayRestrictedFetchBrand(wrappedFetch, sourceFetch) {
++	if (sourceFetch?.[PLINTHWAY_RESTRICTED_FETCH_BRAND] === true) Object.defineProperty(wrappedFetch, PLINTHWAY_RESTRICTED_FETCH_BRAND, { value: true });
++	return wrappedFetch;
++}
+ /**
+ * Derives an OIDC `application_type` from a client's registered redirect URIs
+ * when the consumer has not set one explicitly (SEP-837). Loopback hosts and
+@@ -634,7 +643,7 @@ async function parseErrorResponse(input) {
+ */
+ function warnCredentialInvalidation(provider, error, invalidated) {
+ 	const action = provider.invalidateCredentials === void 0 ? `retrying authorization without discarding the stored ${invalidated} (provider implements no invalidateCredentials())` : `invalidating the stored ${invalidated} and retrying authorization`;
+-	console.warn(`[mcp-sdk] OAuth ${JSON.stringify(error.code)} — ${action}. Cause: ${JSON.stringify(error.message)}`);
++	console.warn(`[mcp-sdk] OAuth ${JSON.stringify(error.code)} — ${action}.`);
+ }
+ /**
+ * Orchestrates the full auth flow with a server.
+@@ -811,7 +820,7 @@ async function authInternal(provider, { serverUrl, authorizationCode, iss, scope
+ 			});
+ 		} catch (error) {
+ 			if (error instanceof InsecureTokenEndpointError) throw error;
+-			if (!(error instanceof require_src.OAuthError) || error.code === require_src.OAuthErrorCode.ServerError) console.warn(`[mcp-sdk] Could not refresh OAuth tokens; falling back to a new authorization request. Cause: ${JSON.stringify(error instanceof Error ? error.message : String(error))}`);
++			if (!(error instanceof require_src.OAuthError) || error.code === require_src.OAuthErrorCode.ServerError) console.warn("[mcp-sdk] Could not refresh OAuth tokens; falling back to a new authorization request.");
+ 			else throw error;
+ 		}
+ 		if (newTokens) {
+@@ -1253,7 +1262,7 @@ function prepareAuthorizationCodeRequest(authorizationCode, codeVerifier, redire
+ * Used by {@linkcode exchangeAuthorization}, {@linkcode refreshAuthorization}, and {@linkcode fetchToken}.
+ */
+ async function executeTokenRequest(authorizationServerUrl, { metadata, tokenRequestParams, clientInformation, addClientAuthentication, resource, dpop, fetchFn }) {
+-	const tokenUrl = assertSecureTokenEndpoint(metadata?.token_endpoint ?? new URL("/token", authorizationServerUrl));
++	const tokenUrl = tokenEndpointForFetch(metadata?.token_endpoint ?? new URL("/token", authorizationServerUrl), fetchFn);
+ 	const headers = new Headers({
+ 		"Content-Type": "application/x-www-form-urlencoded",
+ 		Accept: "application/json"
+@@ -4431,7 +4440,7 @@ var Client = class extends require_src.Protocol {
+ */
+ async function requestJwtAuthorizationGrant(options) {
+ 	const { tokenEndpoint, audience, resource, idToken, clientId, clientSecret, scope, fetchFn = fetch } = options;
+-	const tokenUrl = assertSecureTokenEndpoint(tokenEndpoint);
++	const tokenUrl = tokenEndpointForFetch(tokenEndpoint, fetchFn);
+ 	const params = new URLSearchParams({
+ 		grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+ 		requested_token_type: "urn:ietf:params:oauth:token-type:id-jag",
+@@ -4526,7 +4535,7 @@ async function discoverAndRequestJwtAuthGrant(options) {
+ */
+ async function exchangeJwtAuthGrant(options) {
+ 	const { tokenEndpoint, jwtAuthGrant, clientId, clientSecret, authMethod = "client_secret_basic", fetchFn = fetch } = options;
+-	const tokenUrl = assertSecureTokenEndpoint(tokenEndpoint);
++	const tokenUrl = tokenEndpointForFetch(tokenEndpoint, fetchFn);
+ 	const params = new URLSearchParams({
+ 		grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+ 		assertion: jwtAuthGrant
+@@ -5079,8 +5088,8 @@ var SSEClientTransport = class {
+ 			}
+ 		} else this._authProvider = opts?.authProvider;
+ 		this._redirectPolicy = opts?.redirectPolicy;
+-		this._fetchWithInit = require_src.createFetchWithInit(opts?.fetch, opts?.requestInit);
+-		if (this._redirectPolicy === "follow") this._fetchWithInit = require_src.fetchLeavingRedirects(this._fetchWithInit);
++		this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(require_src.createFetchWithInit(opts?.fetch, opts?.requestInit), opts?.fetch);
++		if (this._redirectPolicy === "follow") this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(require_src.fetchLeavingRedirects(this._fetchWithInit), this._fetchWithInit);
+ 	}
+ 	_last401Response;
+ 	_connectAuthRetried = false;
+@@ -5382,8 +5391,8 @@ var StreamableHTTPClientTransport = class {
+ 			if (opts.authProvider.dpop) this._fetch = withDpopFromProvider(opts.authProvider)(opts.fetch ?? fetch);
+ 		} else this._authProvider = opts?.authProvider;
+ 		this._redirectPolicy = opts?.redirectPolicy;
+-		this._fetchWithInit = require_src.createFetchWithInit(opts?.fetch, opts?.requestInit);
+-		if (this._redirectPolicy === "follow") this._fetchWithInit = require_src.fetchLeavingRedirects(this._fetchWithInit);
++		this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(require_src.createFetchWithInit(opts?.fetch, opts?.requestInit), opts?.fetch);
++		if (this._redirectPolicy === "follow") this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(require_src.fetchLeavingRedirects(this._fetchWithInit), this._fetchWithInit);
+ 		this._sessionId = opts?.sessionId;
+ 		this._protocolVersion = opts?.protocolVersion;
+ 		this._reconnectionOptions = opts?.reconnectionOptions ?? DEFAULT_STREAMABLE_HTTP_RECONNECTION_OPTIONS;
+diff --git a/dist/index.mjs b/dist/index.mjs
+index c1a09a82b8121d6a1b038ccc6d02bae46d55dbcf..b7ba8002c473a50b1bde973533df4519f308d747 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -546,6 +546,15 @@ function assertSecureTokenEndpoint(tokenEndpoint) {
+ 	if (url.protocol !== "https:" && !isLoopbackHost(url.hostname)) throw new InsecureTokenEndpointError(url.href);
+ 	return url;
+ }
++const PLINTHWAY_RESTRICTED_FETCH_BRAND = Symbol.for("plinthway.restricted-fetch");
++function tokenEndpointForFetch(tokenEndpoint, fetchFn) {
++	if (fetchFn?.[PLINTHWAY_RESTRICTED_FETCH_BRAND] === true) return new URL(String(tokenEndpoint));
++	return assertSecureTokenEndpoint(tokenEndpoint);
++}
++function preservePlinthwayRestrictedFetchBrand(wrappedFetch, sourceFetch) {
++	if (sourceFetch?.[PLINTHWAY_RESTRICTED_FETCH_BRAND] === true) Object.defineProperty(wrappedFetch, PLINTHWAY_RESTRICTED_FETCH_BRAND, { value: true });
++	return wrappedFetch;
++}
+ /**
+ * Derives an OIDC `application_type` from a client's registered redirect URIs
+ * when the consumer has not set one explicitly (SEP-837). Loopback hosts and
+@@ -631,7 +640,7 @@ async function parseErrorResponse(input) {
+ */
+ function warnCredentialInvalidation(provider, error, invalidated) {
+ 	const action = provider.invalidateCredentials === void 0 ? `retrying authorization without discarding the stored ${invalidated} (provider implements no invalidateCredentials())` : `invalidating the stored ${invalidated} and retrying authorization`;
+-	console.warn(`[mcp-sdk] OAuth ${JSON.stringify(error.code)} — ${action}. Cause: ${JSON.stringify(error.message)}`);
++	console.warn(`[mcp-sdk] OAuth ${JSON.stringify(error.code)} — ${action}.`);
+ }
+ /**
+ * Orchestrates the full auth flow with a server.
+@@ -808,7 +817,7 @@ async function authInternal(provider, { serverUrl, authorizationCode, iss, scope
+ 			});
+ 		} catch (error) {
+ 			if (error instanceof InsecureTokenEndpointError) throw error;
+-			if (!(error instanceof OAuthError) || error.code === OAuthErrorCode.ServerError) console.warn(`[mcp-sdk] Could not refresh OAuth tokens; falling back to a new authorization request. Cause: ${JSON.stringify(error instanceof Error ? error.message : String(error))}`);
++			if (!(error instanceof OAuthError) || error.code === OAuthErrorCode.ServerError) console.warn("[mcp-sdk] Could not refresh OAuth tokens; falling back to a new authorization request.");
+ 			else throw error;
+ 		}
+ 		if (newTokens) {
+@@ -1250,7 +1259,7 @@ function prepareAuthorizationCodeRequest(authorizationCode, codeVerifier, redire
+ * Used by {@linkcode exchangeAuthorization}, {@linkcode refreshAuthorization}, and {@linkcode fetchToken}.
+ */
+ async function executeTokenRequest(authorizationServerUrl, { metadata, tokenRequestParams, clientInformation, addClientAuthentication, resource, dpop, fetchFn }) {
+-	const tokenUrl = assertSecureTokenEndpoint(metadata?.token_endpoint ?? new URL("/token", authorizationServerUrl));
++	const tokenUrl = tokenEndpointForFetch(metadata?.token_endpoint ?? new URL("/token", authorizationServerUrl), fetchFn);
+ 	const headers = new Headers({
+ 		"Content-Type": "application/x-www-form-urlencoded",
+ 		Accept: "application/json"
+@@ -4428,7 +4437,7 @@ var Client = class extends Protocol {
+ */
+ async function requestJwtAuthorizationGrant(options) {
+ 	const { tokenEndpoint, audience, resource, idToken, clientId, clientSecret, scope, fetchFn = fetch } = options;
+-	const tokenUrl = assertSecureTokenEndpoint(tokenEndpoint);
++	const tokenUrl = tokenEndpointForFetch(tokenEndpoint, fetchFn);
+ 	const params = new URLSearchParams({
+ 		grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+ 		requested_token_type: "urn:ietf:params:oauth:token-type:id-jag",
+@@ -4523,7 +4532,7 @@ async function discoverAndRequestJwtAuthGrant(options) {
+ */
+ async function exchangeJwtAuthGrant(options) {
+ 	const { tokenEndpoint, jwtAuthGrant, clientId, clientSecret, authMethod = "client_secret_basic", fetchFn = fetch } = options;
+-	const tokenUrl = assertSecureTokenEndpoint(tokenEndpoint);
++	const tokenUrl = tokenEndpointForFetch(tokenEndpoint, fetchFn);
+ 	const params = new URLSearchParams({
+ 		grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+ 		assertion: jwtAuthGrant
+@@ -5076,8 +5085,8 @@ var SSEClientTransport = class {
+ 			}
+ 		} else this._authProvider = opts?.authProvider;
+ 		this._redirectPolicy = opts?.redirectPolicy;
+-		this._fetchWithInit = createFetchWithInit(opts?.fetch, opts?.requestInit);
+-		if (this._redirectPolicy === "follow") this._fetchWithInit = fetchLeavingRedirects(this._fetchWithInit);
++		this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(createFetchWithInit(opts?.fetch, opts?.requestInit), opts?.fetch);
++		if (this._redirectPolicy === "follow") this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(fetchLeavingRedirects(this._fetchWithInit), this._fetchWithInit);
+ 	}
+ 	_last401Response;
+ 	_connectAuthRetried = false;
+@@ -5379,8 +5388,8 @@ var StreamableHTTPClientTransport = class {
+ 			if (opts.authProvider.dpop) this._fetch = withDpopFromProvider(opts.authProvider)(opts.fetch ?? fetch);
+ 		} else this._authProvider = opts?.authProvider;
+ 		this._redirectPolicy = opts?.redirectPolicy;
+-		this._fetchWithInit = createFetchWithInit(opts?.fetch, opts?.requestInit);
+-		if (this._redirectPolicy === "follow") this._fetchWithInit = fetchLeavingRedirects(this._fetchWithInit);
++		this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(createFetchWithInit(opts?.fetch, opts?.requestInit), opts?.fetch);
++		if (this._redirectPolicy === "follow") this._fetchWithInit = preservePlinthwayRestrictedFetchBrand(fetchLeavingRedirects(this._fetchWithInit), this._fetchWithInit);
+ 		this._sessionId = opts?.sessionId;
+ 		this._protocolVersion = opts?.protocolVersion;
+ 		this._reconnectionOptions = opts?.reconnectionOptions ?? DEFAULT_STREAMABLE_HTTP_RECONNECTION_OPTIONS;

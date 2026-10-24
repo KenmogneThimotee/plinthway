@@ -1,0 +1,59 @@
+{
+  "name": "plinthway-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first, policy-controlled runtime for AI models, native tools, and MCP servers",
+  "license": "MIT",
+  "author": "KenmogneThimotee",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KenmogneThimotee/plinthway.git"
+  },
+  "homepage": "https://github.com/KenmogneThimotee/plinthway#readme",
+  "bugs": {
+    "url": "https://github.com/KenmogneThimotee/plinthway/issues"
+  },
+  "type": "module",
+  "packageManager": "pnpm@10.18.3",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit packages apps",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run tests/e2e tests/acceptance tests/integration/mcp-transports.test.ts",
+    "test:conformance": "pnpm test:conformance:local && pnpm test:conformance:upstream",
+    "test:conformance:local": "vitest run tests/acceptance/mcp.test.ts tests/integration/mcp-scale.test.ts packages/mcp-client/src",
+    "test:conformance:upstream": "tsx tests/conformance/run-client-requirements.ts",
+    "test:apps:browser": "playwright test tests/e2e/mcp-app-security.spec.ts",
+    "test:installed": "vitest run tests/e2e/installed-package.test.ts",
+    "pack:cli": "pnpm --filter plinthway pack",
+    "check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
+    "release:gate": "pnpm check && pnpm test:e2e && pnpm test:conformance && pnpm test:apps:browser && pnpm test:installed && pnpm audit --prod"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri": "3.1.9"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@plinthway/shared": "workspace:*",
+    "@modelcontextprotocol/conformance": "0.2.0-alpha.12",
+    "@playwright/test": "1.57.0",
+    "@types/node": "^24.7.2",
+    "eslint": "^9.38.0",
+    "jose": "6.2.12",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
+    "tsx": "4.20.6",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.46.1",
+    "vitest": "^4.0.0"
+  }
+}

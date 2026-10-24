@@ -1,0 +1,53 @@
+name: Bug report
+description: Report reproducible incorrect behavior
+title: '[Bug]: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Never include credentials, tokens, private profile files, or sensitive MCP responses. Report security issues through SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Plinthway version
+      description: Output of `plinthway --version`.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, terminal, Node.js version, and installation method.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction
+      description: Provide the smallest deterministic sequence of commands or keystrokes.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include redacted output and error codes when available.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and discussions.
+          required: true
+        - label: I removed credentials, tokens, personal paths, and private data.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

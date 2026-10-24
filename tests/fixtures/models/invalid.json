@@ -1,0 +1,12 @@
+{
+  "anthropic": {
+    "id": "anthropic",
+    "name": "Anthropic",
+    "models": {
+      "broken": {
+        "id": "broken",
+        "limit": { "context": -1 }
+      }
+    }
+  }
+}

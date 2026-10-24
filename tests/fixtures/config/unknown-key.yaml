@@ -1,0 +1,6 @@
+schemaVersion: 1
+providers: {}
+mcpServers: {}
+security:
+  defaultToolPolicy: deny
+unexpected: true

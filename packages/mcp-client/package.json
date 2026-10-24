@@ -1,0 +1,27 @@
+{
+  "name": "@plinthway/mcp-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plinthway/auth": "workspace:*",
+    "@plinthway/config": "workspace:*",
+    "@plinthway/mcp-app-host": "workspace:*",
+    "@plinthway/policy": "workspace:*",
+    "@plinthway/shared": "workspace:*",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/ext-tasks": "0.2.2",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "jose": "^6.2.12",
+    "undici": "7.30.1",
+    "yaml": "2.9.1",
+    "zod": "4.6.7"
+  }
+}

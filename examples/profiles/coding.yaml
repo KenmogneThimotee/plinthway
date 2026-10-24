@@ -1,0 +1,27 @@
+schemaVersion: 1
+id: coding
+name: Software Engineering
+description: A tool-capable profile for repository work.
+model:
+  primary: anthropic/claude-sonnet-4-5
+  fallback:
+    - openai/gpt-5
+  parameters:
+    temperature: 0.2
+    maxOutputTokens: 8192
+mcp:
+  enabled:
+    - filesystem
+tools:
+  defaultPolicy: deny
+  rules:
+    - tool: filesystem.read_file
+      action: allow
+    - tool: filesystem.write_file
+      action: ask
+agent:
+  instructionsFile: ../instructions/coding.md
+  maxSteps: 30
+  toolTimeoutSeconds: 60
+session:
+  persist: true
