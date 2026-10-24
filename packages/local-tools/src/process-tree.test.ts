@@ -21,6 +21,8 @@ describe('terminateProcessTree', () => {
 
     await terminateProcessTree(child);
 
-    await expect(closed).resolves.toMatchObject({ code: null });
+    const result = await closed;
+    if (process.platform === 'win32') expect(result.code).not.toBe(0);
+    else expect(result).toMatchObject({ code: null });
   });
 });

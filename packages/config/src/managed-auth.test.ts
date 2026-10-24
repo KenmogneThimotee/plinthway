@@ -47,23 +47,26 @@ describe('managed enterprise authorization configuration', () => {
     ).toThrow();
   });
 
-  it('loads a locked file and rejects group/world-writable POSIX files', async () => {
-    const directory = await mkdtemp(path.join(tmpdir(), 'plinthway-managed-auth-'));
-    const file = path.join(directory, 'managed-auth.yaml');
-    await writeFile(
-      file,
-      `schemaVersion: 1\nprofiles:\n  workforce:\n    issuer: https://login.example.com\n    clientId: plinthway-desktop\n    scopes: [openid]\n    resources:\n      - resource: https://mcp.example.com/api\n        authorizationServer: https://auth.example.com\n        clientId: plinthway-mcp\n        credential: { source: keyring, id: workforce-mcp-secret }\n`,
-      { mode: 0o600 },
-    );
+  it.skipIf(process.platform === 'win32')(
+    'loads a locked file and rejects group/world-writable POSIX files',
+    async () => {
+      const directory = await mkdtemp(path.join(tmpdir(), 'plinthway-managed-auth-'));
+      const file = path.join(directory, 'managed-auth.yaml');
+      await writeFile(
+        file,
+        `schemaVersion: 1\nprofiles:\n  workforce:\n    issuer: https://login.example.com\n    clientId: plinthway-desktop\n    scopes: [openid]\n    resources:\n      - resource: https://mcp.example.com/api\n        authorizationServer: https://auth.example.com\n        clientId: plinthway-mcp\n        credential: { source: keyring, id: workforce-mcp-secret }\n`,
+        { mode: 0o600 },
+      );
 
-    await expect(
-      loadManagedAuthorizationConfig({ path: file, platform: 'linux' }),
-    ).resolves.toMatchObject({ profiles: { workforce: { clientId: 'plinthway-desktop' } } });
-    await chmod(file, 0o666);
-    await expect(
-      loadManagedAuthorizationConfig({ path: file, platform: 'linux' }),
-    ).rejects.toMatchObject({ code: 'CONFIG_INVALID' });
-  });
+      await expect(
+        loadManagedAuthorizationConfig({ path: file, platform: 'linux' }),
+      ).resolves.toMatchObject({ profiles: { workforce: { clientId: 'plinthway-desktop' } } });
+      await chmod(file, 0o666);
+      await expect(
+        loadManagedAuthorizationConfig({ path: file, platform: 'linux' }),
+      ).rejects.toMatchObject({ code: 'CONFIG_INVALID' });
+    },
+  );
 
   it('reads the legacy administrator path only when the Plinthway path is absent', async () => {
     const directory = await mkdtemp(path.join(tmpdir(), 'plinthway-managed-auth-fallback-'));
@@ -72,13 +75,21 @@ describe('managed enterprise authorization configuration', () => {
     await writeFile(legacy, `schemaVersion: 1\nprofiles: {}\n`, { mode: 0o600 });
 
     await expect(
-      loadManagedAuthorizationConfig({ path: current, fallbackPath: legacy, platform: 'linux' }),
+      loadManagedAuthorizationConfig({
+        path: current,
+        fallbackPath: legacy,
+        platform: process.platform,
+      }),
     ).resolves.toEqual({ schemaVersion: 1, profiles: {} });
 
     await writeFile(current, `schemaVersion: 1\nprofiles: {}\n`, { mode: 0o600 });
     await chmod(legacy, 0o666);
     await expect(
-      loadManagedAuthorizationConfig({ path: current, fallbackPath: legacy, platform: 'linux' }),
+      loadManagedAuthorizationConfig({
+        path: current,
+        fallbackPath: legacy,
+        platform: process.platform,
+      }),
     ).resolves.toEqual({ schemaVersion: 1, profiles: {} });
   });
 

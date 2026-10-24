@@ -14,6 +14,10 @@ import {
 import { WorkspacePathPolicy } from './path-policy.js';
 import { terminateProcessTree } from './process-tree.js';
 
+export function isIgnorableStdinError(error: NodeJS.ErrnoException): boolean {
+  return error.code === 'EPIPE' || error.code === 'ERR_STREAM_DESTROYED' || error.code === 'EOF';
+}
+
 type Arguments = Readonly<Record<string, JsonValue>>;
 
 const SAFE_ENVIRONMENT_KEYS = [
@@ -314,7 +318,7 @@ export class ShellToolProvider implements ToolProvider {
         );
       });
       child.stdin.on('error', (error: NodeJS.ErrnoException) => {
-        if (error.code === 'EPIPE' || error.code === 'ERR_STREAM_DESTROYED') return;
+        if (isIgnorableStdinError(error)) return;
         fail(
           new PlinthwayError(
             'STORAGE_ERROR',

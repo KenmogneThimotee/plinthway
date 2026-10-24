@@ -1,4 +1,14 @@
-import { link, mkdtemp, mkdir, readFile, rename, rm, symlink, writeFile } from 'node:fs/promises';
+import {
+  link,
+  mkdtemp,
+  mkdir,
+  readFile,
+  realpath,
+  rename,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -15,7 +25,10 @@ afterEach(async () => {
 async function setup(): Promise<{ readonly root: string; readonly tools: FilesystemToolProvider }> {
   const root = await mkdtemp(path.join(tmpdir(), 'plinthway-filesystem-'));
   cleanup.push(root);
-  return { root, tools: await FilesystemToolProvider.create({ workspace: root }) };
+  return {
+    root: await realpath(root),
+    tools: await FilesystemToolProvider.create({ workspace: root }),
+  };
 }
 
 describe('FilesystemToolProvider', () => {

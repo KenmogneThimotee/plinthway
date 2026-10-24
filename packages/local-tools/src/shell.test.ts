@@ -1,10 +1,10 @@
-import { mkdtemp, mkdir, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { ShellToolProvider } from './shell.js';
+import { isIgnorableStdinError, ShellToolProvider } from './shell.js';
 
 const cleanup: string[] = [];
 
@@ -27,10 +27,17 @@ async function setup(options: { readonly maxOutputBytes?: number } = {}) {
       ? {}
       : { limits: { maxOutputBytes: options.maxOutputBytes } }),
   });
-  return { root, tools };
+  return { root: await realpath(root), tools };
 }
 
 describe('ShellToolProvider', () => {
+  it('ignores platform pipe errors after a child closes stdin', () => {
+    expect(isIgnorableStdinError({ code: 'EPIPE' })).toBe(true);
+    expect(isIgnorableStdinError({ code: 'ERR_STREAM_DESTROYED' })).toBe(true);
+    expect(isIgnorableStdinError({ code: 'EOF' })).toBe(true);
+    expect(isIgnorableStdinError({ code: 'EACCES' })).toBe(false);
+  });
+
   it('publishes one approval-gated open-world tool', async () => {
     const { tools } = await setup();
     expect(tools.listTools()).toHaveLength(1);

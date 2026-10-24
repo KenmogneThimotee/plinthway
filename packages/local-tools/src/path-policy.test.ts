@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -15,9 +15,10 @@ afterEach(async () => {
 async function workspace(): Promise<{ readonly root: string; readonly outside: string }> {
   const parent = await mkdtemp(path.join(tmpdir(), 'plinthway-path-policy-'));
   cleanup.push(parent);
-  const root = path.join(parent, 'workspace');
-  const outside = path.join(parent, 'outside');
-  await Promise.all([mkdir(root), mkdir(outside)]);
+  const rawRoot = path.join(parent, 'workspace');
+  const rawOutside = path.join(parent, 'outside');
+  await Promise.all([mkdir(rawRoot), mkdir(rawOutside)]);
+  const [root, outside] = await Promise.all([realpath(rawRoot), realpath(rawOutside)]);
   return { root, outside };
 }
 

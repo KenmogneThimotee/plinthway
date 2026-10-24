@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readdir, readFile, rename, rm } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 import { atomicWriteFile, BUILTIN_TOOL_NAMESPACES, profileIdSchema } from '@plinthway/config';
@@ -30,6 +30,18 @@ export type ProfileFileWriter = (file: string, contents: string | Uint8Array) =>
 
 function hasCode(error: unknown, code: string): boolean {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === code;
+}
+
+export async function isProfileCreationCollision(
+  error: unknown,
+  destination: string,
+): Promise<boolean> {
+  if (hasCode(error, 'EEXIST') || hasCode(error, 'ENOTEMPTY')) return true;
+  if (!hasCode(error, 'EPERM')) return false;
+  return stat(destination).then(
+    () => true,
+    () => false,
+  );
 }
 
 function invalid(message: string, details: Record<string, JsonValue> = {}, cause?: unknown) {
@@ -329,7 +341,7 @@ export class FileProfileRepository {
       await rename(staging, destination);
     } catch (error) {
       await rm(staging, { recursive: true, force: true }).catch(() => undefined);
-      if (hasCode(error, 'EEXIST') || hasCode(error, 'ENOTEMPTY')) {
+      if (await isProfileCreationCollision(error, destination)) {
         throw invalid(`Profile ${bundle.profile.id} already exists`, {
           profileId: bundle.profile.id,
         });

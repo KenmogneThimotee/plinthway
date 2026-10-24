@@ -1,7 +1,7 @@
 import type { McpPersistedTask, McpTaskRepositoryPort } from '@plinthway/mcp-client';
 import { deepFreeze, PlinthwayError } from '@plinthway/shared';
 
-import type { SessionDatabase } from './database.js';
+import { closeStatement, type SessionDatabase } from './database.js';
 import { serializeForPersistence } from './repository.js';
 
 type SqlValue = string | number | bigint | Uint8Array | null;
@@ -89,7 +89,7 @@ export class SqliteMcpTaskRepository implements McpTaskRepositoryPort {
       if (error instanceof PlinthwayError) throw error;
       throw new PlinthwayError('STORAGE_ERROR', 'Could not persist MCP task', {}, { cause: error });
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -106,7 +106,7 @@ export class SqliteMcpTaskRepository implements McpTaskRepositoryPort {
       const value = statement.get(serverId, taskId, profileGenerationId);
       return value === undefined ? undefined : parseTask(row(value));
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -122,7 +122,7 @@ export class SqliteMcpTaskRepository implements McpTaskRepositoryPort {
         profileGenerationId === undefined ? statement.all() : statement.all(profileGenerationId);
       return values.map((value) => parseTask(row(value)));
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -134,7 +134,7 @@ export class SqliteMcpTaskRepository implements McpTaskRepositoryPort {
     try {
       statement.run(serverId, taskId, profileGenerationId);
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 }

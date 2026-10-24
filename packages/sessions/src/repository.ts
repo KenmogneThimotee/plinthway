@@ -16,7 +16,7 @@ import {
   type SessionId,
 } from '@plinthway/shared';
 
-import type { SessionDatabase } from './database.js';
+import { closeStatement, type SessionDatabase } from './database.js';
 
 type SqlValue = string | number | bigint | Uint8Array | null;
 type Row = Record<string, SqlValue>;
@@ -235,7 +235,7 @@ export class SqliteSessionRepository implements SessionRepository {
     } catch (error) {
       throw storageError(`Could not create session ${input.id}`, error);
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
     return this.get(input.id);
   }
@@ -252,7 +252,7 @@ export class SqliteSessionRepository implements SessionRepository {
       }
       return sessionFromRow(row(value));
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -264,7 +264,7 @@ export class SqliteSessionRepository implements SessionRepository {
     try {
       return statement.all().map((value) => sessionFromRow(row(value)));
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -290,7 +290,7 @@ export class SqliteSessionRepository implements SessionRepository {
           }
           current = row(value);
         } finally {
-          currentStatement.close();
+          closeStatement(currentStatement);
         }
         if (Number(current.last_sequence) !== expectedSequence) {
           throw new PlinthwayError('SESSION_CONFLICT', 'Session sequence changed concurrently', {
@@ -315,7 +315,7 @@ export class SqliteSessionRepository implements SessionRepository {
             );
           });
         } finally {
-          insert.close();
+          closeStatement(insert);
         }
         const update = this.#database.connection.prepare(
           'UPDATE sessions SET last_sequence = ?, status = ?, updated_at = ? WHERE id = ?',
@@ -328,7 +328,7 @@ export class SqliteSessionRepository implements SessionRepository {
             id,
           );
         } finally {
-          update.close();
+          closeStatement(update);
         }
       });
     } catch (error) {
@@ -346,7 +346,7 @@ export class SqliteSessionRepository implements SessionRepository {
     try {
       return statement.all(id).map((value) => eventFromRow(row(value)));
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -408,7 +408,7 @@ export class SqliteActiveProfileStore {
       const value = statement.get();
       return activeFromRow(value === undefined ? undefined : row(value));
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -434,7 +434,7 @@ export class SqliteActiveProfileStore {
         this.#now().toISOString(),
       );
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -446,7 +446,7 @@ export class SqliteActiveProfileStore {
     try {
       statement.run();
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 }
@@ -469,7 +469,7 @@ export class SqliteSelectedProfileStore {
       const value = statement.get();
       return value === undefined ? undefined : String(row(value).profile_id);
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -485,7 +485,7 @@ export class SqliteSelectedProfileStore {
     try {
       statement.run(profileId, this.#now().toISOString());
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -497,7 +497,7 @@ export class SqliteSelectedProfileStore {
     try {
       statement.run();
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 }
@@ -547,7 +547,7 @@ export class SqliteTransitionRepository {
         now,
       );
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
     return {
       id,
@@ -579,7 +579,7 @@ export class SqliteTransitionRepository {
           this.#now().toISOString(),
         );
       } finally {
-        active.close();
+        closeStatement(active);
       }
       const transition = this.#database.connection.prepare(
         "UPDATE profile_transitions SET state = 'committed', updated_at = ? WHERE id = ? AND state = 'prepared'",
@@ -588,7 +588,7 @@ export class SqliteTransitionRepository {
         const result = transition.run(this.#now().toISOString(), id);
         if (Number(result.changes) !== 1) throw storageError('Profile transition is not prepared');
       } finally {
-        transition.close();
+        closeStatement(transition);
       }
     });
   }
@@ -601,7 +601,7 @@ export class SqliteTransitionRepository {
     try {
       statement.run(serializeForPersistence(redact(error)), this.#now().toISOString(), id);
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -619,7 +619,7 @@ export class SqliteTransitionRepository {
         try {
           clear.run();
         } finally {
-          clear.close();
+          closeStatement(clear);
         }
       } else {
         const serialized = serializeForPersistence(previous);
@@ -639,7 +639,7 @@ export class SqliteTransitionRepository {
             this.#now().toISOString(),
           );
         } finally {
-          restore.close();
+          closeStatement(restore);
         }
       }
       const transition = this.#database.connection.prepare(`
@@ -655,7 +655,7 @@ export class SqliteTransitionRepository {
         if (Number(result.changes) !== 1)
           throw storageError('Profile transition cannot be compensated');
       } finally {
-        transition.close();
+        closeStatement(transition);
       }
     });
   }
@@ -680,7 +680,7 @@ export class SqliteTransitionRepository {
         };
       });
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 }

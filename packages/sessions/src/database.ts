@@ -12,18 +12,16 @@ import {
   SELECTED_PROFILE_MIGRATION,
 } from './migrations.js';
 
-declare module 'node:sqlite' {
-  interface StatementSync {
-    close(): void;
-  }
-}
-
 interface SqliteRow {
   readonly [key: string]: string | number | bigint | null;
 }
 
 function row(value: unknown): SqliteRow | undefined {
   return value as SqliteRow | undefined;
+}
+
+export function closeStatement(statement: unknown): void {
+  (statement as { readonly close?: () => void }).close?.();
 }
 
 export class SessionDatabase {
@@ -90,7 +88,7 @@ export class SessionDatabase {
       try {
         statement.run(version, new Date().toISOString());
       } finally {
-        statement.close();
+        closeStatement(statement);
       }
       this.connection.exec('COMMIT');
     } catch (error) {
@@ -106,7 +104,7 @@ export class SessionDatabase {
     try {
       return Number(row(statement.get())?.version ?? 0);
     } finally {
-      statement.close();
+      closeStatement(statement);
     }
   }
 
@@ -122,7 +120,7 @@ export class SessionDatabase {
         const result = row(statement.get());
         return result === undefined ? null : (Object.values(result)[0] ?? null);
       } finally {
-        statement.close();
+        closeStatement(statement);
       }
     };
     return {

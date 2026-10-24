@@ -3,9 +3,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SessionDatabase } from './database.js';
+import { closeStatement, SessionDatabase } from './database.js';
 import { INITIAL_MIGRATION } from './migrations.js';
 
 const roots: string[] = [];
@@ -15,6 +15,13 @@ afterEach(async () => {
 });
 
 describe('SessionDatabase', () => {
+  it('supports Node 24 releases where StatementSync has no explicit close method', () => {
+    expect(() => closeStatement({})).not.toThrow();
+    const close = vi.fn();
+    closeStatement({ close });
+    expect(close).toHaveBeenCalledOnce();
+  });
+
   it('migrates fresh databases, configures safety pragmas, and reopens idempotently', async () => {
     const root = await mkdtemp(path.join(tmpdir(), 'plinthway-db-'));
     roots.push(root);

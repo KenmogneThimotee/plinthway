@@ -8,7 +8,7 @@ import { stringify } from 'yaml';
 import { asProfileId } from '@plinthway/shared';
 import { atomicWriteFile } from '@plinthway/config';
 
-import { FileProfileRepository } from './repository.js';
+import { FileProfileRepository, isProfileCreationCollision } from './repository.js';
 import { createProfileLayout, profile } from './test-helpers.js';
 
 const roots: string[] = [];
@@ -25,6 +25,17 @@ async function makeRepository(): Promise<{ root: string; repository: FileProfile
 }
 
 describe('FileProfileRepository', () => {
+  it('recognizes Windows EPERM as a destination collision only when the profile exists', async () => {
+    const { repository } = await makeRepository();
+    const destination = repository.directoryFor('default');
+    await mkdir(destination, { recursive: true });
+
+    await expect(isProfileCreationCollision({ code: 'EPERM' }, destination)).resolves.toBe(true);
+    await expect(
+      isProfileCreationCollision({ code: 'EPERM' }, repository.directoryFor('missing')),
+    ).resolves.toBe(false);
+  });
+
   it('creates exactly one empty default bundle as three files under concurrent startup', async () => {
     const { repository } = await makeRepository();
 
