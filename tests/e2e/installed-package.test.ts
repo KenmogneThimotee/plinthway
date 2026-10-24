@@ -13,6 +13,7 @@ import { startMockLlmServer } from '../mocks/llm-server.js';
 
 const execute = promisify(execFile);
 const roots: string[] = [];
+const pnpmExecutable = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
 
 afterEach(async () => {
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
@@ -31,7 +32,7 @@ async function installedPlinthway(): Promise<{
   const project = path.join(root, 'project');
   const home = path.join(root, 'home');
   await Promise.all([mkdir(pack), mkdir(project), mkdir(home)]);
-  await execute('pnpm', ['--filter', 'plinthway', 'pack', '--pack-destination', pack], {
+  await execute(pnpmExecutable, ['--filter', 'plinthway', 'pack', '--pack-destination', pack], {
     cwd: path.resolve('.'),
   });
   const tarball = path.join(pack, 'plinthway-0.1.0.tgz');
@@ -39,7 +40,10 @@ async function installedPlinthway(): Promise<{
     path.join(project, 'package.json'),
     JSON.stringify({ name: 'installed-smoke', private: true, version: '1.0.0' }),
   );
-  await execute('pnpm', ['add', '--prefer-offline', tarball], { cwd: project, timeout: 60_000 });
+  await execute(pnpmExecutable, ['add', '--prefer-offline', tarball], {
+    cwd: project,
+    timeout: 60_000,
+  });
   return {
     root,
     home,

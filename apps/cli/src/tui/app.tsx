@@ -1048,6 +1048,7 @@ export async function startTui(
   const stdout = options.stdout ?? process.stdout;
   const dimensions = stdout as NodeJS.WritableStream & {
     readonly columns?: number;
+    readonly isTTY?: boolean;
     readonly rows?: number;
   };
   const instance = render(
@@ -1062,6 +1063,7 @@ export async function startTui(
       stdout,
       ...(options.stderr === undefined ? {} : { stderr: options.stderr }),
       exitOnCtrlC: false,
+      interactive: dimensions.isTTY === true,
       alternateScreen: true,
     },
   );
