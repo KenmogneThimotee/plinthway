@@ -14,8 +14,10 @@ import {
 import { WorkspacePathPolicy } from './path-policy.js';
 import { terminateProcessTree } from './process-tree.js';
 
-export function isIgnorableStdinError(error: NodeJS.ErrnoException): boolean {
-  return error.code === 'EPIPE' || error.code === 'ERR_STREAM_DESTROYED' || error.code === 'EOF';
+export function isIgnorableStdinError(error: unknown): boolean {
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : undefined;
+  return code === 'EPIPE' || code === 'ERR_STREAM_DESTROYED' || code === 'EOF';
 }
 
 type Arguments = Readonly<Record<string, JsonValue>>;
