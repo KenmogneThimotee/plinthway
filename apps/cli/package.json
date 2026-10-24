@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "8.7.3",
-    "@napi-rs/keyring": "^2.1.1",
+    "@napi-rs/keyring": "^2.1.2",
     "commander": "15.0.0",
     "ink": "8.0.0",
     "marked": "18.0.14",
