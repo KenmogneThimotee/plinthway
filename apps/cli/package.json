@@ -43,7 +43,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@inquirer/prompts": "8.7.3",
+    "@inquirer/prompts": "8.7.4",
     "@napi-rs/keyring": "^2.1.1",
     "commander": "15.0.0",
     "ink": "8.0.0",
