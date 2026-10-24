@@ -75,7 +75,8 @@ describe('installed npm package', () => {
       await execute('tar', ['-tzf', installed.tarball], { maxBuffer: 2 * 1024 * 1024 })
     ).stdout
       .trim()
-      .split('\n');
+      .split('\n')
+      .map((entry) => entry.trim());
     expect(listing.some((entry) => entry.startsWith('package/src/'))).toBe(false);
     expect(listing.some((entry) => entry.startsWith('package/tests/'))).toBe(false);
     expect(listing).toContain('package/dist/main.js');
@@ -94,40 +95,52 @@ describe('installed npm package', () => {
     const installed = await installedPlinthway();
     const environment = isolatedEnvironment(installed);
     expect(await readFile(installed.entry, 'utf8')).toMatch(/^#!\/usr\/bin\/env node/u);
-    expect((await stat(installed.entry)).mode & 0o111).not.toBe(0);
+    if (process.platform !== 'win32') {
+      expect((await stat(installed.entry)).mode & 0o111).not.toBe(0);
+    }
     await expect(
-      execute(installed.binary, ['--version'], { env: environment }),
+      execute(process.execPath, [installed.entry, '--version'], { env: environment }),
     ).resolves.toMatchObject({ stdout: '0.1.0\n' });
-    const profiles = await execute(installed.binary, ['--json', 'profile', 'list'], {
-      env: environment,
-    });
+    const profiles = await execute(
+      process.execPath,
+      [installed.entry, '--json', 'profile', 'list'],
+      {
+        env: environment,
+      },
+    );
     expect(profiles.stdout).toContain('"id":"default"');
     await expect(
-      execute(installed.binary, ['--json', 'models', 'list'], { env: environment }),
+      execute(process.execPath, [installed.entry, '--json', 'models', 'list'], {
+        env: environment,
+      }),
     ).resolves.toMatchObject({ stdout: '[]\n' });
     expect(await readFile(path.join(installed.home, 'config.yaml'), 'utf8')).toContain(
       'models.dev/api.json',
     );
   }, 60_000);
 
-  it('runs when invoked through a global-style executable symlink', async () => {
-    const installed = await installedPlinthway();
-    const binary = path.join(installed.root, 'plinthway');
-    await symlink(installed.entry, binary);
+  it.skipIf(process.platform === 'win32')(
+    'runs when invoked through a global-style executable symlink',
+    async () => {
+      const installed = await installedPlinthway();
+      const binary = path.join(installed.root, 'plinthway');
+      await symlink(installed.entry, binary);
 
-    await expect(
-      execute(binary, ['--version'], {
-        env: isolatedEnvironment(installed),
-      }),
-    ).resolves.toMatchObject({ stdout: '0.1.0\n' });
-  }, 60_000);
+      await expect(
+        execute(binary, ['--version'], {
+          env: isolatedEnvironment(installed),
+        }),
+      ).resolves.toMatchObject({ stdout: '0.1.0\n' });
+    },
+    60_000,
+  );
 
   it('shuts down an installed chat process cleanly on two-stage SIGINT', async () => {
     const installed = await installedPlinthway();
-    await execute(installed.binary, ['init'], {
+    await execute(process.execPath, [installed.entry, 'init'], {
       env: isolatedEnvironment(installed),
     });
-    const child = spawn(installed.binary, ['chat'], {
+    const child = spawn(process.execPath, [installed.entry, 'chat'], {
       env: isolatedEnvironment(installed),
       stdio: ['pipe', 'pipe', 'pipe'],
     });
@@ -162,7 +175,7 @@ describe('installed npm package', () => {
     );
     const transcript = path.join(installed.root, 'terminal-output.txt');
     const outputFile = await open(transcript, 'w');
-    const child = spawn(installed.binary, ['chat'], {
+    const child = spawn(process.execPath, [installed.entry, 'chat'], {
       env: {
         ...process.env,
         PLINTHWAY_HOME: installed.home,
@@ -206,7 +219,7 @@ describe('installed npm package', () => {
     const fixture = await startMockLlmServer();
     try {
       const environment = isolatedEnvironment(installed);
-      await execute(installed.binary, ['init'], { env: environment });
+      await execute(process.execPath, [installed.entry, 'init'], { env: environment });
       await new CatalogCache(path.join(installed.home, 'cache')).commit(
         {
           local: {
@@ -266,7 +279,7 @@ describe('installed npm package', () => {
         path.join(installed.home, 'profiles', 'default', 'mcp.yaml'),
         ['schemaVersion: 1', 'servers: {}', 'enabled: []', ''].join('\n'),
       );
-      const result = await execute(installed.binary, ['run', 'hello'], {
+      const result = await execute(process.execPath, [installed.entry, 'run', 'hello'], {
         env: environment,
         timeout: 10_000,
       });
